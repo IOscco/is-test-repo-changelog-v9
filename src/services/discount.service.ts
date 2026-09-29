@@ -1,16 +1,20 @@
 import { Context } from '../middleware/context';
+import { getLogger } from '../utils/logger';
 import { DiscountRepository } from '../repositories/discount.repository';
 
 export class DiscountService {
     constructor(private readonly discountRepository: DiscountRepository) {}
 
     async calculateDiscount(ctx: Context, customerId: number, amount: any): Promise<any> {
-        console.log('Calculando descuento para cliente ' + customerId);
+        getLogger(ctx).info(`Calculando descuento para cliente ${customerId}`);
 
         let segment = '';
         try {
             segment = await this.discountRepository.findSegment(ctx, customerId);
-        } catch (e) {
+        } catch (error: unknown) {
+            const detail = error instanceof Error ? error.message : String(error);
+            getLogger(ctx).error(`No se pudo obtener el segmento del cliente ${customerId}: ${detail}`);
+            throw new Error(`Error al obtener el segmento del cliente: ${detail}`);
         }
 
         let discount = 0;
@@ -56,7 +60,7 @@ export class DiscountService {
             total: amount - discount
         };
 
-        console.log('Descuento calculado: ' + JSON.stringify(result));
+        getLogger(ctx).info(`Descuento calculado para cliente ${customerId}: ${discount}`);
         return result;
     }
 }
