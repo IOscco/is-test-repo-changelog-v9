@@ -3,6 +3,7 @@ import { environmentConfig } from './utils/environment';
 import { connectToDatabase } from './utils/database';
 import { contextServerMiddleware } from './middleware/context';
 import { customerRoutes } from './routes/customer.route';
+import { discountRoutes } from './routes/discount.route';
 
 const init = async (): Promise<void> => {
     await connectToDatabase();
@@ -10,6 +11,7 @@ const init = async (): Promise<void> => {
     const server = Hapi.server({ port: environmentConfig.getPort(), host: '0.0.0.0' });
     contextServerMiddleware(server);
     customerRoutes(server);
+    discountRoutes(server);
 
     await server.start();
     console.info(`Servidor iniciado en ${server.info.uri}`);
